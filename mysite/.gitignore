@@ -11,6 +11,7 @@ venv/
 /back_media/*
 /back_static/*
 /.idea/*
+.idea/*
 /.env
 /db.sqlite3
 back_media/
