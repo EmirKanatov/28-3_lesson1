@@ -1,4 +1,5 @@
-../idea/
+.idea/
+../.idea/
 *.pyc
 .venv/*
 venv/
@@ -10,7 +11,6 @@ venv/
 /static/*
 /back_media/*
 /back_static/*
-/.idea/*
 .idea/*
 /.env
 /db.sqlite3
