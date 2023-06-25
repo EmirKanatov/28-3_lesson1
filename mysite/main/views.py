@@ -2,8 +2,8 @@ from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Crosses
-from .serializers import CrossSerializer, CrossDetailSerializer, AnonymousRatingSerializer
+from .models import Crosses, Factory
+from .serializers import CrossSerializer, CrossDetailSerializer, AnonymousRatingSerializer, FactorySerializer
 
 
 # Create your views here.
@@ -34,3 +34,10 @@ def sent_anonymous_rating(request):
         print(serializer.data)
         return Response(data={"message: Ok"}, status=status.HTTP_200_OK)
     return Response(data={"message: Error"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def factory_view(request):
+    queryset = Factory.objects.all()
+    data = FactorySerializer(queryset, many=True).data
+    return Response(data=data, status=status.HTTP_200_OK)

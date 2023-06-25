@@ -1,12 +1,32 @@
 from rest_framework import serializers
-from .models import Crosses
+from .models import Crosses, Factory, AnonymousReview
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AnonymousReview
+        fields = (
+            'title',
+            'description',
+            'rating',
+        )
+
+
+class FactorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Factory
+        fields = "__all__"
 
 
 class CrossSerializer(serializers.ModelSerializer):
+    factory = FactorySerializer()
+    get_all_review = ReviewSerializer(many=True)
 
     class Meta:
         model = Crosses
-        exclude = "description price".split()
+        fields = "id title get_factory_name factory get_all_review description price".split()
 
 
 class CrossDetailSerializer(serializers.ModelSerializer):
