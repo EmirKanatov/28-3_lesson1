@@ -1,10 +1,14 @@
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view
+from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import Crosses, Factory
 from .serializers import CrossSerializer, CrossDetailSerializer, AnonymousRatingSerializer, FactorySerializer, \
-    FactoryCreateUpdateSerializer
+    FactoryCreateUpdateSerializer, CrossModelSerializer
 
 
 # Create your views here.
@@ -18,15 +22,29 @@ def hello_world_view(request):
 def get_crosses(request):
     if request.method == "GET":
         queryset = Crosses.objects.all()
-        data = CrossSerializer(queryset, many=True).data
+        data = CrossModelSerializer(queryset, many=True).data
         return Response(data=data, status=status.HTTP_200_OK)
     elif request.method == "POST":
-        title = request.data.get('title')
-        description = request.data.get('description')
-        price = request.data.get('price')
-        factory = request.data.get('factory')
-        cross = Crosses.objects.create(title=title, description=description, price=price, factory_id=factory)
+        serializer = CrossSerializer(data=request.data)
+
+        serializer.is_valid(raise_exception=True)
+
+        title = serializer.data.get('title')
+
+        description = serializer.data.get('description')
+        price = serializer.data.get('price')
+        factory_id = serializer.data.get('factory_id')
+        cross = Crosses.objects.create(title=title, description=description, price=price, factory_id=factory_id)
+
         return Response(data=CrossSerializer(cross, many=False).data)
+
+
+class CrossApiView(ListCreateAPIView):
+    queryset = Crosses.objects.all()
+    serializer_class = CrossModelSerializer
+
+    def get_serializer_class(self):
+        return CrossModelSerializer if self.request.method == "GET" else CrossSerializer
 
 
 @api_view(['GET', 'PUT'])
@@ -41,6 +59,12 @@ def retrieve_crosses(request, **kwargs):
         cross.price = request.data.get('price')
         cross.save()
         return Response(data=CrossSerializer(cross, many=False).data)
+
+
+class RetrieveUpdateCrossesAPIView(RetrieveUpdateAPIView):
+    queryset = Crosses.objects.all()
+    serializer_class = CrossDetailSerializer
+
 
 
 @api_view(['POST'])

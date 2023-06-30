@@ -5,12 +5,12 @@ from .models import Crosses, AnonymousReview, Factory
 
 @admin.register(Crosses)
 class CoursesAdmin(admin.ModelAdmin):
-    fields = ['title', 'description', 'factory', 'price']
+    fields = ['title', "id", 'description', 'factory', 'price']
 
 
 @admin.register(AnonymousReview)
 class AnonymousReviewAdmin(admin.ModelAdmin):
-    fields = ['title', 'description', 'cross', 'rating']
+    fields = ['title', "id", 'description', 'cross', 'rating']
 
 
 @admin.register(Factory)

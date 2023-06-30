@@ -20,13 +20,38 @@ class FactorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class CrossSerializer(serializers.ModelSerializer):
+class CrossModelSerializer(serializers.ModelSerializer):
     factory = FactorySerializer()
 
     class Meta:
         model = Crosses
         fields = "id title get_factory_name factory description price".split()
 
+
+class CrossSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    factory_id = serializers.IntegerField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2)
+    description = serializers.CharField()
+
+    def validate_factory_id(self, factory_id):
+        try:
+            Factory.objects.get(id=factory_id)
+        except Factory.DoesNotExist:
+            raise serializers.ValidationError("Factory not found")
+        return factory_id
+
+    def validate_title(self, title):
+        if Crosses.objects.filter(title=title).count() > 0:
+            raise serializers.ValidationError("Crosses with this title already exists")
+        return title
+
+    def create(self, validated_data):
+        cross = Crosses.objects.create(title=validated_data['title'],
+                                       description=validated_data['description'],
+                                       price=validated_data['price'],
+                                       factory_id=validated_data['factory_id'])
+        return cross
 
 class CrossDetailSerializer(serializers.ModelSerializer):
     factory = FactorySerializer()

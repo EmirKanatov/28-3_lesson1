@@ -9,7 +9,7 @@ class Factory(models.Model):
     description = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.name)
+        return str(self.name + " " + str(self.id))
 
 
 class Crosses(models.Model):
