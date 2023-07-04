@@ -1,5 +1,7 @@
+import django_filters
 from django.shortcuts import render
-from rest_framework import status
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status, mixins
 from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
@@ -9,6 +11,7 @@ from rest_framework.views import APIView
 from .models import Crosses, Factory
 from .serializers import CrossSerializer, CrossDetailSerializer, AnonymousRatingSerializer, FactorySerializer, \
     FactoryCreateUpdateSerializer, CrossModelSerializer
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
 
 
 # Create your views here.
@@ -41,10 +44,56 @@ def get_crosses(request):
 
 class CrossApiView(ListCreateAPIView):
     queryset = Crosses.objects.all()
-    serializer_class = CrossModelSerializer
+    serializer_class = CrossSerializer
 
     def get_serializer_class(self):
         return CrossModelSerializer if self.request.method == "GET" else CrossSerializer
+
+
+class CrossesFilter(django_filters.FilterSet):
+    title = django_filters.CharFilter(field_name='title', lookup_expr='icontains')
+    min_price = django_filters.NumberFilter(field_name="price", lookup_expr='price__gt')
+    max_price = django_filters.NumberFilter(field_name="price", lookup_expr='price__lt')
+
+    class Meta:
+        model = Crosses
+        fields = ['title']
+
+
+class CrossModelViewSet(ModelViewSet):
+    queryset = Crosses.objects.all()
+    lookup_field = 'id'
+    filterset_class = CrossesFilter
+    filterset_fields = ['title']
+    ordering_fields = ('price',)
+
+    def get_serializer_class(self):
+        return CrossModelSerializer if self.action in ("list", 'retrieve') else CrossSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = CrossSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        title = serializer.data.get('title')
+        description = serializer.data.get('description')
+        price = serializer.data.get('price')
+        factory_id = serializer.data.get('factory_id')
+        cross = Crosses.objects.create(title=title, description=description, price=price, factory_id=factory_id)
+
+        return Response(data=CrossSerializer(cross, many=False).data)
+
+    def update(self, request, *args, **kwargs):
+        serializer = CrossSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        title = serializer.data.get('title')
+        description = serializer.data.get('description')
+        price = serializer.data.get('price')
+        factory_id = serializer.data.get('factory_id')
+        cross = Crosses.objects.create(title=title, description=description, price=price, factory_id=factory_id)
+
+        return Response(data=CrossSerializer(cross, many=False).data)
+
+
+# class UpdateDestroyCrossesModelViewSet(GenericViewSet, mixins.UpdateModelMixin,mixins.DestroyModelMixin):
 
 
 @api_view(['GET', 'PUT'])

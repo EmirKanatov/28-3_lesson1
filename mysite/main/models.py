@@ -42,3 +42,11 @@ class AnonymousReview(models.Model):
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=512)
     rating = models.PositiveIntegerField(null=False, blank=True, choices=REVIEWS_CHOICES)
+
+
+class Color(models.Model):
+    name = models.CharField(null=False, blank=False, max_length=128, verbose_name="Цвет")
+    cross = models.ManyToManyField(Crosses, related_name="colors")
+
+    def __str__(self):
+        return str(self.name)
