@@ -52,12 +52,12 @@ class CrossApiView(ListCreateAPIView):
 
 class CrossesFilter(django_filters.FilterSet):
     title = django_filters.CharFilter(field_name='title', lookup_expr='icontains')
-    min_price = django_filters.NumberFilter(field_name="price", lookup_expr='price__gt')
-    max_price = django_filters.NumberFilter(field_name="price", lookup_expr='price__lt')
+    price__gt = django_filters.NumberFilter(field_name='price', lookup_expr='gt')
+    price__lt = django_filters.NumberFilter(field_name='price', lookup_expr='lt')
 
     class Meta:
         model = Crosses
-        fields = ['title']
+        fields = ['title', 'price']
 
 
 class CrossModelViewSet(ModelViewSet):
