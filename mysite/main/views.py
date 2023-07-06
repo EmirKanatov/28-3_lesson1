@@ -5,6 +5,8 @@ from rest_framework import status, mixins
 from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
+from users.perimissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -18,6 +20,8 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericV
 
 @api_view(['GET'])
 def hello_world_view(request):
+    print(request.user)
+    print(request.auth)
     return Response(data={'message: Hello world'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -45,6 +49,7 @@ def get_crosses(request):
 class CrossApiView(ListCreateAPIView):
     queryset = Crosses.objects.all()
     serializer_class = CrossSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get_serializer_class(self):
         return CrossModelSerializer if self.request.method == "GET" else CrossSerializer
