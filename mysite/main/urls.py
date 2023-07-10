@@ -10,7 +10,7 @@ urlpatterns = [
     path("factory/", factory_view),
     path("crosses_model/", CrossApiView.as_view()),
     path("crosses_model/<int:pk>/", RetrieveUpdateCrossesAPIView.as_view()),
-    path("modelviewset_croses/", CrossModelViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path("modelviewset_croses/", CrossModelViewSet.as_view({'get': 'list', 'post': 'create'}), name='modelviewset_croses'),
     path("modelviewset_croses/<int:id>/", CrossModelViewSet.as_view({
         'get': 'retrieve',
         'put': 'update',
