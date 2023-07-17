@@ -17,6 +17,7 @@ class Crosses(models.Model):
     title = models.CharField(null=True, blank=True, max_length=128)
     price = models.DecimalField(null=True, blank=True, max_digits=10, decimal_places=2)
     description = models.TextField(max_length=512)
+    image = models.ImageField(null=True, blank=True)
 
     def get_factory_name(self):
         return self.factory.name if self.factory else None

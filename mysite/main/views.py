@@ -1,6 +1,8 @@
 import django_filters
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import status, mixins
 from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateAPIView
@@ -11,6 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Crosses, Factory
+from .schemas import CrossListFilterSchema
 from .serializers import CrossSerializer, CrossDetailSerializer, AnonymousRatingSerializer, FactorySerializer, \
     FactoryCreateUpdateSerializer, CrossModelSerializer
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
@@ -75,6 +78,25 @@ class CrossModelViewSet(ModelViewSet):
     def get_serializer_class(self):
         return CrossModelSerializer if self.action in ("list", 'retrieve') else CrossSerializer
 
+    @extend_schema(
+        # extra parameters added to the schema
+        parameters=[
+            OpenApiParameter(name='artist', description='Filter by artist', required=False, type=str),
+            OpenApiParameter(
+                name='release',
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                description='Filter by release date',
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='short optional summary',
+                        description='longer description',
+                        value='1993-08-23'
+                    ),
+                ],
+            ),
+        ],)
     def create(self, request, *args, **kwargs):
         serializer = CrossSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -128,7 +150,10 @@ def sent_anonymous_rating(request):
         return Response(data={"message: Ok"}, status=status.HTTP_200_OK)
     return Response(data={"message: Error"}, status=status.HTTP_400_BAD_REQUEST)
 
-
+@extend_schema(
+        request=FactorySerializer,
+        responses={201: FactoryCreateUpdateSerializer},
+    )
 @api_view(['GET', "POST"])
 def factory_view(request):
     if request.method == "GET":
